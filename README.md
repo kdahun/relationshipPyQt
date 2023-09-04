@@ -62,3 +62,12 @@ def initUI(self):
 
 * self.canvas.mpl_connect(...) : 캔버스에 이벤트 핸들러를 연결한다.
   1. button_press_event , self.on_press : 마우스 버튼을 눌렀을 때 호출되는 이벤트 핸들러로, 노드를 눌렀을 때 실행된다.
+  2. motion_notify_event, self.on_motion : 마우스를 이돌할 떄 호출되는 이벤트 핸들러로, 노드를 움직일 떄 실행된다.
+  3. button_release_event, self.on_release : 마우스 버튼을 놓았을 때 호출되는 이벤트 핸들러로, 노드를 놨을 때 실행된다.
+ 
+* self.update_graph() : 초기 그래프를 업데이트 한다. 이 함수는 그래프를 그리는 역할을 한다.
+
+* self.dragging = False와 self.selected_node = None : 드래그 상태와 선택된 노드를 나타내는 변수를 초기화한다.
+  드래그가 아직 시작되지 않았으므로 self.dragging은 False로 설정하고, 선택된 노드가 없으므로 self.dragging은 False로 설정하고 선택된 노드가 없으므로 self.selected_node은 None으로 설정된다.
+
+이렇게 초기화된 사용자 인터페이스는 그래프를 표시하고, 마우스 이벤트를 처리하며 노드를 이돌할 수 있는 기능을 제공한다
