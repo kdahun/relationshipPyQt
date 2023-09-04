@@ -29,10 +29,36 @@ def __init__(self, graph):
   super().__init__()
 
   self.graph = graph
-  self.pos = nx.spring_layout(self.graph) # 초기 노드 위치
+  self.pos = nx.spring_layout(self.graph)           # 초기 노드 위치
 
-  self.setGeometry(100,100,800.600)
-  self.setWindowTitle("NetworkX Graph Viewer")
+  self.setGeometry(100,100,800.600)                 # 윈도우 크기 설정
+  self.setWindowTitle("NetworkX Graph Viewer")      # title 변경
 
   self.initUI()
 ```
+* '__init__' 메서드는 클래스의 생성자로, 객체가 생성될 떄 호출된다. 그래프('graph')를 받아 초기화하고, 윈도우의 위치, 크기, 제목 등을 설정한다. 그리고 'initUI' 메서드를 호출하여 사용자 인터페이스를 초기화 한다.
+
+---
+## initUI 메서드에서 사용자 인터페이스를 초기화한다.
+```
+def initUI(self):
+  self.canvas = FigureCanvas(plt.figure())                          # 캔버스 생성
+  self.setCentralWidget(self.canvas)                                # 캔버스를 중앙 위젯으로 설정
+
+  self.canvas.mpl_connect('button_press_event', self.on_press)      # 노드를 클릭했을 떄 핸들링 이벤트
+  self.canvas.mpl_connect('motion_notify_evnet', self.on_motion)    # 노드를 잡고 드래그 중일 떄 핸들링 이벤트
+  self.canvas.mpl_connect('button_release_event', self.on_release)  # 노드를 놨을 때 핸들링 이벤트
+
+  self.update_graph()                                               # 초기 그래프 업데이트
+
+  self.dragging = False
+  self.selected_node = None
+```
+
+* self.canvas = FigureCanvas(plt.figure()) : Matplotlib를 사용하여 그래프를 그리기 위한 캔버스를 생성한다.
+  plt.figure() 함수는 새로운 Matplotlib Figure 객체를 생섣하고, 이를 FigureCanvas에 넣어서 캔버스를 생섣한다.
+  
+* self.setCentralWidget(self.canvas) : 캔버스를 QMainWindow의 중앙 위젯으로 설정한다.
+
+* self.canvas.mpl_connect(...) : 캔버스에 이벤트 핸들러를 연결한다.
+  1) 
