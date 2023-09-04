@@ -61,4 +61,6 @@ def initUI(self):
 * self.setCentralWidget(self.canvas) : 캔버스를 QMainWindow의 중앙 위젯으로 설정한다.
 
 * self.canvas.mpl_connect(...) : 캔버스에 이벤트 핸들러를 연결한다.
-  1) 
+  1.
+  2.
+  3.
