@@ -1,4 +1,4 @@
-    # relationshipPyQt
+# relationshipPyQt
 
 ```
 import sys
