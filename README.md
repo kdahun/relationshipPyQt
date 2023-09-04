@@ -1,4 +1,4 @@
-# relationshipPyQt
+    # relationshipPyQt
 
 ```
 import sys
@@ -61,6 +61,4 @@ def initUI(self):
 * self.setCentralWidget(self.canvas) : 캔버스를 QMainWindow의 중앙 위젯으로 설정한다.
 
 * self.canvas.mpl_connect(...) : 캔버스에 이벤트 핸들러를 연결한다.
-  1.
-  2.
-  3.
+  1. button_press_event , self.on_press : 마우스 버튼을 눌렀을 때 호출되는 이벤트 핸들러로, 노드를 눌렀을 때 실행된다.
