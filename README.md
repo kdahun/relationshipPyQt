@@ -70,4 +70,37 @@ def initUI(self):
 * self.dragging = False와 self.selected_node = None : 드래그 상태와 선택된 노드를 나타내는 변수를 초기화한다.
   드래그가 아직 시작되지 않았으므로 self.dragging은 False로 설정하고, 선택된 노드가 없으므로 self.dragging은 False로 설정하고 선택된 노드가 없으므로 self.selected_node은 None으로 설정된다.
 
-이렇게 초기화된 사용자 인터페이스는 그래프를 표시하고, 마우스 이벤트를 처리하며 노드를 이돌할 수 있는 기능을 제공한다
+이렇게 초기화된 사용자 인터페이스는 그래프를 표시하고, 마우스 이벤트를 처리하며 노드를 이동할 수 있는 기능을 제공한다
+
+---
+## update_graph 메서드에서 그래프 업데이트
+```
+def update_graph(self):
+  self.canvas.figure.clf()  #  기존 그래프 지우기
+  ax = self.canvas.figure.add_subplot(111)
+
+  nx.draw(self.graph, self.pos, with_labels=True, node_size=1000, node_color='skyblue', font_size=10, font_color='black', font_weight='bold', ax=ax)
+
+  self.canvas.draw()
+```
+* self canvas.figure.clf() : 기존 그래프를 지우기 위해 Matplotlib Figure 객체를 클리어 한다. 이렇게 하면 이전에 그려진 그래프를 모두 삭제한다.
+
+* ax = self.canvas.figure.add_subplot(111) : 그래프를 그릴 서브플롯(서브그림)을 생성한다. 111은 하나의 그림과 하나의 그림을 가진 그림 영역을 의미한다.
+  1) Matplotlib에서 그림(figure)은 하나의 그래프나 도표를 나타낸다. 그림 내에는 여려 개의 서브 플롯을 생성하여 여려 개의 그래프를 동시에 표시할 수 있다. 각 서브플롯은 그림 내의 작은 영역을 의미한다.
+  2) self.canvas.figure 는 현재 그림을 나타내는 Matplotlib Figure 객체이다.
+  3) add_subplot(111) 은 서브플롯을 그림에 추가하는 메서드이다.괄호 안의 인수는 서브플롯의 위치 및 배치를 지정한다.
+     * 첫 번째 숫자 : 격자의 행 수
+     * 두 번째 숫자 : 격자의 열 수
+     * 세 번째 숫자 : 그림 번호
+     * 111은 그림을 하나의 행과 열로 나누고 하나의 그림을 그린다는 것을 의미한다.
+  4) nx.draw(...) : Networkx 의 nx.draw 함수를 사용하여 그래프를 그린다.
+     * self.graph : 그래프 객체
+     * self.pos : 노드의 위치 정보를 담고 있는 딕셔너리
+     * with_labels = True : 노드에 라벨을 표시
+     * node_size = 1000 : 노드의 크기를 설정
+     * node_color = 'skyblue' : 노드의 색상을 설정
+     * font_size = 10 : 라벨의 폰트 크기를 설정
+     * font_color = 'black' : 라벨의 폰트 색상을 설정
+     * font_weight = 'bold' : 라벨의 글꼴 두께를 설정
+     * ax = ax : 앞에서 생성한 서브플롯을 사용하여 그래프
+  5) self.canvas.draw() : 그래프를 그린후, Maplotlib 캔버스를 다시 그림
