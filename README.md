@@ -122,11 +122,17 @@ def on_press(self, event):
 마우스 버튼을 눌렀을 때 호출되는 onpress 메서드이다. 이 메서드는 그래프 상의 노드를 클릭했을 때 해당 노드를 선택하고 드래그를 시작하는 역할을 한다.
 
 * evnet.button == 1 : event 객체의 button 속성은 마우스 버튼의 상태를 나타내며, 여기서는 왼쪽 마우스 버튼을 눌렀을 때를 확인하기 위해 1과 비교한다.
+  
 * x, y = event.xdata, event.ydata : event 객체에서 마우스 이벤트의 x, y 좌표를 가져온다. 이것은 마우스 클릭한 위치를 나타낸다.
+  
 * for node, (nx, ny) in self.pos.items() : self.pos는 노드의 위치 정보를 담고 있는 딕셔너리이다. 이 딕셔너리를 순회하면서 노드와 해당 노드의 위치 (nx, ny)를 가져온다.
+  
 * if abs(x - nx) <= 0.1 and abs(y - ny) <= 0.1 : 클릭한 마우스 위치(x, y)와 각 노드의 위치 (nx, ny)를 비교한다. abs함수를 사용하여 절대값을 비교하고, 이 값이 0.1보다 작거나 같은 경우 노드 위치 근처를 클릭한 것으로 판단한다. 이것은 노드를 정확하게 클릭하지 않아도 근처를 클릭하면 해당 노드를 선택할 수 있도록 하는 조건이다.
+  
 * self.selected_node = node : 선택한 노트를 self.selected_node 변수에 저장한다.
+  
 * self.dragging = True : 드래그 상태를 나타내는 self.dragging 변수를 True로 설정한다.
+  
 * self.offset = (x - nx, y - ny) : 선택한 노드를 드래그할 때 노드가 움직이는 위치를 계산하기 위해 드래그 시작 시의 마우스 위치와 노드 위치의 차이를 self.offset 변수에 저장한다.
 
 즉, 이 코드는 왼쪽 마우스 버튼을 클릭한 위치와 각 노드의 위치를 비교하여 가장 가꺄운 노드를 선택하고, 그 노드를 드래그 할 수 있는 상태로 설정하는 역할을 한다. 이후 마우스 이동 이벤트와 마우스 릴리즈 이벤트에서 이 선택한 노드를 이용하여 노드를 드래그하거나 놓을 수 있게 된다.
@@ -139,9 +145,29 @@ def on_motion(self, event):
         self.pos[self.selected_node] = (x - self.offset[0], y - self.offset[1])
         self.update_graph()
 ```
+on_motion 메서드는 마우스를 움직일 때 호출되는 이벤트 핸들러로, 노드를 드래그하는 동작을 구현한 부분이다.
+* if self.dragging : 이 부분은 현재 드래그 상태인지 확인하는 조건이다. 만약 self.dragging이 True인 경우에만 드래그 동작을 수행한다. self.dragging은 마우스 왼쪽 버튼을 눌러 노드를 선택한 후에 onpress 이벤트 핸들러에서 True로 설정되며, 마우스 버튼을 놓을 때 False로 다시 설정된다.
+
+* x, y = event.xdata,evnet.ydata : event 객체에서 마우스 이벤트의 x,y 좌표를 가져온다. 이것은 현재 마우스 포인터의 위치를 나타낸다.
+
+* self.pos[self.selected_node] = (x - self.offset[0], y - self.offset[1]) : 선택한 노드의 위치를 업데이트한다. 드래그 동작으 ㄹ구현하기 위해, 이동한 마우스의 위치와 쵝 클릭한 마우스 위치의 차이인 self.offset을 이용하여 노드의 새로운 위치를 계산한다. 이렇게 노드가 마우스 포인트를 따라 이동한다.
+
+* self.update_graph() : 그래프를 업데이트하는 update_graph 메서드를 호출한다. 이는 노드의 새로운 위치 정보를 반영하여 그래프를 다시 그리는 역할을 한다. 즉, 노드를 드래그하는 동안 실시간으로 그래프가 업데이트되어 노드의 위치가 변경된다.
+
+이렇게 on_motion 메서드는 노드를 드래그하는 동작을 구현하고, 드래그한 결과를 그래프에 반영하여 시각적으로 보여준다.
+
 ```
 def on_release(self, event):
     if event.button == 1:
         self.dragging = False
         self.selected_node = None
 ```
+on_release 메서드는 마우스 버튼을 놓았을 때 호출되는 이벤트 핸들러로, 노드 드래그 동작의 종료를 처리하는 부분이다
+
+* if event.button == 1 : 이 부분은 마우스 왼쪽 버튼을 놓았을 때만 이벤트 처리를 수항하기 위한 조건이다. event.button은 마우스 버튼의 상태를 나타내는 값으로, 왼쪽 버튼의 경우 1로 나타낸다.
+
+* self.dragging = False : 드래그 상태를 나타내는 self.dragging 변수를 False로 설정한다. 이렇게 하면 드랙 상태가 종료되어 마우스 이동에 대한 이벤트 핸들링이 중지된다.
+
+* self.selected_node = None : 선택된 노드를 나타내는 self.selected_node 변수를 None으로 설정한다. 드래그가 종료되면 더 이상 어떤 노드도 선택되지 않은 상태로 초기화 된다.
+
+이렇게 on_release 메서드는 마우스 왼쪽 버튼을 놓았을 때 드래그 동작을 종료하고 선택된 노드를 초기화하는 역할을 한다. 이후 다시 마우스를 클릭하여 노드를 선택하고 드래그할 수 있다.
