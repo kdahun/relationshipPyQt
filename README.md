@@ -104,3 +104,44 @@ def update_graph(self):
      * font_weight = 'bold' : 라벨의 글꼴 두께를 설정
      * ax = ax : 앞에서 생성한 서브플롯을 사용하여 그래프
   5) self.canvas.draw() : 그래프를 그린후, Maplotlib 캔버스를 다시 그림
+
+
+---
+## 마우스 이베트 핸들러
+```
+def on_press(self, event):
+    if event.button == 1:
+        x, y = event.xdata, event.ydata
+        for node, (nx, ny) in self.pos.items():
+            if abs(x - nx) <= 0.1 and abs(y - ny) <= 0.1:  # 노드 위치 근처를 클릭했을 때
+                self.selected_node = node
+                self.dragging = True
+                self.offset = (x - nx, y - ny)
+                break
+```
+마우스 버튼을 눌렀을 때 호출되는 onpress 메서드이다. 이 메서드는 그래프 상의 노드를 클릭했을 때 해당 노드를 선택하고 드래그를 시작하는 역할을 한다.
+
+* evnet.button == 1 : event 객체의 button 속성은 마우스 버튼의 상태를 나타내며, 여기서는 왼쪽 마우스 버튼을 눌렀을 때를 확인하기 위해 1과 비교한다.
+* x, y = event.xdata, event.ydata : event 객체에서 마우스 이벤트의 x, y 좌표를 가져온다. 이것은 마우스 클릭한 위치를 나타낸다.
+* for node, (nx, ny) in self.pos.items() : self.pos는 노드의 위치 정보를 담고 있는 딕셔너리이다. 이 딕셔너리를 순회하면서 노드와 해당 노드의 위치 (nx, ny)를 가져온다.
+* if abs(x - nx) <= 0.1 and abs(y - ny) <= 0.1 : 클릭한 마우스 위치(x, y)와 각 노드의 위치 (nx, ny)를 비교한다. abs함수를 사용하여 절대값을 비교하고, 이 값이 0.1보다 작거나 같은 경우 노드 위치 근처를 클릭한 것으로 판단한다. 이것은 노드를 정확하게 클릭하지 않아도 근처를 클릭하면 해당 노드를 선택할 수 있도록 하는 조건이다.
+* self.selected_node = node : 선택한 노트를 self.selected_node 변수에 저장한다.
+* self.dragging = True : 드래그 상태를 나타내는 self.dragging 변수를 True로 설정한다.
+* self.offset = (x - nx, y - ny) : 선택한 노드를 드래그할 때 노드가 움직이는 위치를 계산하기 위해 드래그 시작 시의 마우스 위치와 노드 위치의 차이를 self.offset 변수에 저장한다.
+
+즉, 이 코드는 왼쪽 마우스 버튼을 클릭한 위치와 각 노드의 위치를 비교하여 가장 가꺄운 노드를 선택하고, 그 노드를 드래그 할 수 있는 상태로 설정하는 역할을 한다. 이후 마우스 이동 이벤트와 마우스 릴리즈 이벤트에서 이 선택한 노드를 이용하여 노드를 드래그하거나 놓을 수 있게 된다.
+
+
+```
+def on_motion(self, event):
+    if self.dragging:
+        x, y = event.xdata, event.ydata
+        self.pos[self.selected_node] = (x - self.offset[0], y - self.offset[1])
+        self.update_graph()
+```
+```
+def on_release(self, event):
+    if event.button == 1:
+        self.dragging = False
+        self.selected_node = None
+```
