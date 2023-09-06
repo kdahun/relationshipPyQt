@@ -69,8 +69,6 @@
 # if __name__ == '__main__':
 
     
-
-
 #     G = grap()
 #     #
 
@@ -85,12 +83,38 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.font_manager as fm
+
 
 class GraphViewer(QMainWindow): 
-    def __init__(self, graph):
+    def __init__(self):
         super().__init__()
 
-        self.graph = graph
+        # 한글 폰트 설정
+        font_path = 'C:/Windows/Fonts/malgunsl.ttf'  # 원하는 한글 폰트 파일의 경로를 지정해야 합니다.
+        font_id = fm.FontProperties(fname=font_path).get_name()
+        plt.rc('font', family=font_id)
+
+
+        data = pd.read_csv('relation.csv',index_col=0)
+        print(data)
+        df = data.fillna(0) # NaN 값을 0으로 넣어주기
+        listA = [] # 빈리스트 만들기
+        for i in df.columns:
+            for j in df.index:
+                if df[i][j] != 0: # 호감도가 0이면 엣지 연결 안하기 위해서
+                    tupleA = (i,j,df[i][j])
+                    listA.append(tupleA)
+        print(listA)
+
+        g = nx.Graph()
+
+        for node1, node2, score in listA:
+            g.add_edge(node1, node2, weight = score) # node 모두 연결
+
+        
+        
+        self.graph = g
         self.pos = nx.spring_layout(self.graph)  # 초기 노드 위치
 
         self.setGeometry(100, 100, 800, 600)
@@ -101,7 +125,7 @@ class GraphViewer(QMainWindow):
     def initUI(self):
         self.canvas = FigureCanvas(plt.figure())  # 캔버스 생성
         self.setCentralWidget(self.canvas)  # 캔버스를 중앙 위젯으로 설정
-
+        
         self.canvas.mpl_connect('button_press_event', self.on_press)        # 이벤트 핸들러 (노드를 눌렀을 떄)
         self.canvas.mpl_connect('motion_notify_event', self.on_motion)      # 이벤트 핸들러 (노드를 움직일 떄)
         self.canvas.mpl_connect('button_release_event', self.on_release)    # 이벤트 핸들러 (노드를 놨을 때)
@@ -115,7 +139,39 @@ class GraphViewer(QMainWindow):
         self.canvas.figure.clf()  # 기존 그래프 지우기
         ax = self.canvas.figure.add_subplot(111)
 
-        nx.draw(self.graph, self.pos, with_labels=True, node_size=1000, node_color='skyblue', font_size=10, font_color='black', font_weight='bold', ax=ax)
+
+        source = '주인'
+        target = '부하1'
+        all_paths = nx.all_simple_edge_paths(self.graph,source=source, target= target)
+        path_list = []
+        for path in all_paths:
+            for node in path:
+                for a in node:
+                    path_list.append(a)
+
+        path_list=list(set(path_list))
+        print(path_list)
+
+        edge_labels = {(u, v): d['weight'] for u, v, d in self.graph.edges(data=True)}
+
+        color_list=[]
+        for node in self.graph.nodes:
+            if node == source or node == target:
+                color_list.append('yellow')
+            elif node in path_list:
+                color_list.append('red')
+            else:
+                color_list.append('blue')
+
+        node_colors = ['red' if node in path_list else 'yellow' for node in self.graph.nodes]
+        
+        
+
+        nx.draw(self.graph, self.pos, with_labels=True, node_size=1000, node_color=color_list, font_size=10, font_color='black', font_weight='bold', ax=ax, font_family='Malgun Gothic')
+        
+
+        nx.draw_networkx_edge_labels(self.graph, self.pos, edge_labels=edge_labels, font_size=8, font_color='black')
+
 
         self.canvas.draw()
 
@@ -141,54 +197,11 @@ class GraphViewer(QMainWindow):
             self.selected_node = None
             print(self.pos)
 
-def grap():
-    data=pd.read_csv('relation.csv',index_col=0)
-    print(data)
-    df = data.fillna(0) # NaN 값을 0으로 넣어주기
-
-    listA = [] # 호감도가 1이상인 값을 갖는 튜플을 가지고 있는 리스트
-
-
-    for i in df.columns:
-        for j in df.index:
-            if df[i][j]!=0: # 호감도가 0이 아니면 튜플에 넣어 준다.
-                tupleA = (i,j,df[i][j])
-                listA.append(tupleA)
-    print(listA)
-
-    # 데이터를 기반으로 그래프에 노드와 엣지 추가
-    edge_weights = {}
-
-    g = nx.Graph()
-
-    for node1, node2, score in listA:
-        g.add_edge(node1, node2, weight=score)
-
-    # a에서 b로 이동할 수 있는 모든 경로 찾기
-    all_paths = nx.all_simple_paths(g, source='주인', target='부하1')
-
-    # 모든 노드를 파란색으로 표시하기 위해 노드 색상 설정
-    node_colors = ['blue'] * len(g.nodes)
-
-    # 경로 상의 노드를 빨간색으로 표시하기 위해 노드 색상 설정
-    for path in all_paths:
-        for node in path:
-            node_colors[list(g.nodes).index(node)] = 'red'
-
-    # 그래프 시각화
-    plt.figure(figsize=(20, 20))
-    edge_widths = [1.5 * g[u][v]['weight'] for u, v in g.edges()]
-    pos = nx.spring_layout(g, seed=1)
-    pos['a'] = (0, 5)
-
-    nx.draw_networkx(g, pos, with_labels=True, width=edge_widths, node_size=8000, node_color=node_colors)
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_weights, font_size=30)
-    plt.axis('off')
-    return g
 
 if __name__ == '__main__':
-    G = grap() # csv 파일을 DataFrame으로 읽고 그래프로 만들기
+    # G = grap() # csv 파일을 DataFrame으로 읽고 그래프로 만들기
 
+    
 
     # QApplication은 PyQt에서 GUI 애플리케이션을 시작하는 데 사용되는 클래스이다.
     # 이 클래스의 인스턴스를 생성하면 QT 애플리케이션의 기본 환경을 설정한다.
@@ -196,7 +209,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
 
-    window = GraphViewer(G)
+    window = GraphViewer()
     window.show()
     sys.exit(app.exec_())
 
