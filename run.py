@@ -1,87 +1,9 @@
-# import sys
-# import networkx as nx
-# import matplotlib.pyplot as plt
-# from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsView
-# from PyQt5.QtCore import Qt
-# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
-
-# import pandas as pd
-# import networkx as nx
-# import matplotlib.pyplot as plt
-
-
-# class GraphViewer(QMainWindow):
-#     def __init__(self, graph):
-#         super().__init__()
-
-#         self.graph = graph
-#         self.pos = nx.spring_layout(self.graph)  # 초기 노드 위치
-
-#         self.setGeometry(100, 100, 800, 800)
-#         self.setWindowTitle("NetworkX Graph Viewer")
-
-#         self.initUI()
-
-#     def initUI(self):
-#         self.canvas = FigureCanvas(plt.figure())  # 캔버스 생성
-#         self.setCentralWidget(self.canvas)  # 캔버스를 중앙 위젯으로 설정
-
-#         self.canvas.mpl_connect('button_press_event', self.on_press)
-#         self.canvas.mpl_connect('motion_notify_event', self.on_motion)
-#         self.canvas.mpl_connect('button_release_event', self.on_release)
-
-#         self.update_graph()  # 초기 그래프 업데이트
-
-#         self.dragging = False
-#         self.selected_node = None
-
-#     def update_graph(self):
-#         self.canvas.figure.clf()  # 기존 그래프 지우기
-#         ax = self.canvas.figure.add_subplot(111)
-
-#         nx.draw(self.graph, self.pos, with_labels=True, node_size=1000, node_color='skyblue', font_size=10, font_color='black', font_weight='bold', ax=ax)
-
-#         self.canvas.draw()
-
-#     def on_press(self, event):
-#         if event.button == 1:
-#             x, y = event.xdata, event.ydata
-#             for node, (nx, ny) in self.pos.items():
-#                 if abs(x - nx) <= 0.05 and abs(y - ny) <= 0.05:  # 노드 위치 근처를 클릭했을 때
-#                     self.selected_node = node
-#                     self.dragging = True
-#                     self.offset = (x - nx, y - ny)
-#                     break
-
-#     def on_motion(self, event):
-#         if self.dragging:
-#             x, y = event.xdata, event.ydata
-#             self.pos[self.selected_node] = (x - self.offset[0], y - self.offset[1])
-#             self.update_graph()
-
-#     def on_release(self, event):
-#         self.dragging = False
-#         self.selected_node = None
-
-
-
-# if __name__ == '__main__':
-
-    
-#     G = grap()
-#     #
-
-#     app = QApplication(sys.argv)
-#     window = GraphViewer(G)
-#     window.show()
-#     sys.exit(app.exec_())
 
 import sys
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton, QVBoxLayout,QHBoxLayout, QWidget,QLabel
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.font_manager as fm
 
@@ -89,12 +11,6 @@ import matplotlib.font_manager as fm
 class GraphViewer(QMainWindow): 
     def __init__(self):
         super().__init__()
-
-        # 한글 폰트 설정
-        font_path = 'C:/Windows/Fonts/malgunsl.ttf'  # 원하는 한글 폰트 파일의 경로를 지정해야 합니다.
-        font_id = fm.FontProperties(fname=font_path).get_name()
-        plt.rc('font', family=font_id)
-
 
         data = pd.read_csv('relation.csv',index_col=0)
         print(data)
@@ -123,57 +39,121 @@ class GraphViewer(QMainWindow):
         self.initUI()
 
     def initUI(self):
+        self.target=''
+        self.source=''
+
+        # QWidget 클래스의 인스턴스를 생성
+        self.central_wiget = QWidget() # 컨네이너 역할
+
+        # QMainWindow의 중앙 위젯을 설정
+        # QMainWindow의 중앙 영역에 self.central_widget에 할당한 QWidget 인스턴스가 배치된다.
+        self.setCentralWidget(self.central_wiget) 
+
         self.canvas = FigureCanvas(plt.figure())  # 캔버스 생성
-        self.setCentralWidget(self.canvas)  # 캔버스를 중앙 위젯으로 설정
+
+        # self.label1 = QLable("시작")
+        # self.label2 = QLable(" 끝 ")
+
+        
+
+        # 입력 위젯 2개
+        self.text_input = QLineEdit(self)
+        self.text_input.setPlaceholderText("Enter a number")
+        self.text_input2 = QLineEdit(self)
+        self.text_input2.setPlaceholderText("Enter a number")
+
+        # 라벨 2개
+        label1 = QLabel('시작 : ',self)
+        label2 = QLabel('끝 : ',self)
+        
+        self.label3 = QLabel(' ',self)
+        self.label4 = QLabel(' ',self)
+
+        # 입력 완료 버튼
+        self.update_button = QPushButton("Update Graph" , self)
+        self.update_button.clicked.connect(self.update_graph)
+
+        hbox1 = QHBoxLayout()
+        hbox1.addWidget(label1)
+        hbox1.addWidget(self.text_input)
+        hbox1.addWidget(self.label3)
+        hbox2 = QHBoxLayout()
+        hbox2.addWidget(label2)
+        hbox2.addWidget(self.text_input2)
+        hbox2.addWidget(self.label4)
+
+
+
+        layout = QVBoxLayout()
+       
+        layout.addWidget(self.canvas)
+        layout.addLayout(hbox1)
+        layout.addLayout(hbox2)
+        layout.addWidget(self.update_button)
+
+        self.central_wiget.setLayout(layout)
+
+        # self.setCentralWidget(self.canvas)  # 캔버스를 중앙 위젯으로 설정
         
         self.canvas.mpl_connect('button_press_event', self.on_press)        # 이벤트 핸들러 (노드를 눌렀을 떄)
         self.canvas.mpl_connect('motion_notify_event', self.on_motion)      # 이벤트 핸들러 (노드를 움직일 떄)
         self.canvas.mpl_connect('button_release_event', self.on_release)    # 이벤트 핸들러 (노드를 놨을 때)
+        self.update_button.clicked.connect(self.targetAndSorce)
 
         self.update_graph()  # 초기 그래프 업데이트
 
         self.dragging = False
         self.selected_node = None
 
+    
     def update_graph(self):
-        self.canvas.figure.clf()  # 기존 그래프 지우기
-        ax = self.canvas.figure.add_subplot(111)
+        if self.target!='' and self.source!='':
+            self.canvas.figure.clf()  # 기존 그래프 지우기
+            ax = self.canvas.figure.add_subplot(111)
 
+            # source = '주인'
+            # target = '부하1'
+            all_paths = nx.all_simple_edge_paths(self.graph,source=self.source, target= self.target)
+            path_list = []
+            for path in all_paths:
+                for node in path:
+                    for a in node:
+                        path_list.append(a)
 
-        source = '주인'
-        target = '부하1'
-        all_paths = nx.all_simple_edge_paths(self.graph,source=source, target= target)
-        path_list = []
-        for path in all_paths:
-            for node in path:
-                for a in node:
-                    path_list.append(a)
+            path_list=list(set(path_list))
+            print(path_list)
 
-        path_list=list(set(path_list))
-        print(path_list)
+            edge_labels = {(u, v): d['weight'] for u, v, d in self.graph.edges(data=True)}
 
-        edge_labels = {(u, v): d['weight'] for u, v, d in self.graph.edges(data=True)}
+            color_list=[]
+            for node in self.graph.nodes:
+                if node == self.source or node == self.target:
+                    color_list.append('yellow')
+                elif node in path_list:
+                    color_list.append('red')
+                else:
+                    color_list.append('blue')
 
-        color_list=[]
-        for node in self.graph.nodes:
-            if node == source or node == target:
-                color_list.append('yellow')
-            elif node in path_list:
-                color_list.append('red')
-            else:
-                color_list.append('blue')
+            node_colors = ['red' if node in path_list else 'yellow' for node in self.graph.nodes]
+            
+            
+            nx.draw(self.graph, self.pos, with_labels=True, node_size=1000, node_color=color_list, font_size=10, font_color='black', font_weight='bold', ax=ax, font_family='Malgun Gothic')
+            
 
-        node_colors = ['red' if node in path_list else 'yellow' for node in self.graph.nodes]
-        
-        
+            nx.draw_networkx_edge_labels(self.graph, self.pos, edge_labels=edge_labels, font_size=8, font_color='black')
 
-        nx.draw(self.graph, self.pos, with_labels=True, node_size=1000, node_color=color_list, font_size=10, font_color='black', font_weight='bold', ax=ax, font_family='Malgun Gothic')
-        
+            self.canvas.draw()
 
-        nx.draw_networkx_edge_labels(self.graph, self.pos, edge_labels=edge_labels, font_size=8, font_color='black')
+    def targetAndSorce(self):
+        text1 = self.text_input.text()
+        self.label3.setText(text1)
+        self.source = text1
 
+        text2 = self.text_input2.text()
+        self.label4.setText(text2)
+        self.target = text2
 
-        self.canvas.draw()
+        self.update_graph()
 
     def on_press(self, event):
         if event.button == 1:
